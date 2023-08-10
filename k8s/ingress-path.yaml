@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-hosts
+  labels:
+    app: ingress-paths
+spec:
+  ingressClassName: ingress-paths
+  rules:
+    - host: www.test.dev
+      http:
+        paths:
+          - pathType: Prefix
+            path: /page1
+            backend:
+              service:
+                name: webx
+                port:
+                  number: 80
+
+          - pathType: Prefix
+            path: /page2
+            backend:
+              service:
+                name: webx
+                port:
+                  number: 80
+
+          - pathType: Prefix
+            path: /page3
+            backend:
+              service:
+                name: webx
+                port:
+                  number: 80

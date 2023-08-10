@@ -1,0 +1,11 @@
+FROM amazonlinux
+
+RUN yum -y update
+RUN yum -y install httpd php
+
+COPY ./index.php /var/www/index.php
+
+RUN mkdir /run/php-fpm
+CMD /usr/sbin/php-fpm && /usr/sbin/httpd -D FOREGROUND
+
+EXPOSE 80

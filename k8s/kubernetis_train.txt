@@ -1,0 +1,152 @@
+https://github.com/adv4000/k8s-lessons файлы для обучения
+https://www.youtube.com/playlist?list=PLg5SS_4L6LYvN1RqaVesof8KAf-02fJSi плейлист
+
+sudo apt install kubectl установка kubectl
+
+kubectl get componentstatuses посмотреть статус кластера
+kubectl cluster-info просмотреть информацию о кластере
+kubectl version посмотреть версию 
+ kubectl get nodes посмотреть информацию о nodes
+
+# minikube пароль root
+minikube version посмотреть версию 
+minikube start запустить кластер для теста
+minikube start --cpus=2 --memory=1800mb --disk-size=6gb минимальная конфигурация (в virtualbox можно изменить)
+minikube start -p MYSUPERCLUSTER создать кластер с этим именем
+minikube ssh зайти в minicube как пользователь docker
+ minikube stop остановить кластер (данные сохраняются)
+minikube delete удалить кластер для теста
+minikube service second-deployment --url показать url для внешки
+
+# eksctl - Для amazon kubernetes кластера (https://eksctl.io/)
+eksctl create cluster --name new-cluster-k8s поднимается кластер 2 ноды 
+eksctl delete cluster --name new-cluster-k8s удалить кластер
+https://eksctl.io/usage/creating-and-managing-clusters/ пример сборки кластера используя конфигурационный файл
+eksctl create cluster -f mycluster.yaml создать кластер из конигурационного файла
+eksctl delete cluster -f mycluster.yaml удалить кластер
+
+# google cloud kubernetes
+gcloud init настроить gcloud с вашим google cloud
+gcloud services enable container.googleapis.com включить api k8s в вашем проекте
+gcloud container clusters create new-cluster-k8s --num-nodes=2 создать кластер kubernetes
+gcloud container clusters get-credentials new-cluster-k8s настроить credentials для kubectl (нужен для управления кластером)
+gcloud container clusters delete new-cluster-k8s удалить кластер
+
+https://labs.play-with-k8s.com/ - бесплатный kubernetes кластер для учебы. Можно пользоваться 4 часа. Максимум 5 nodes.
+для копирования и вставки в терминале используйте CTRL+INSERT и SHIFT+INSERT
+kubeadm init --apiserver-advertise-address $(hostname -i) --pod-network-cidr 10.5.0.0/16 инициализировать master nodes
+kubectl apply -f https://raw.githubusercontent.com/cloudnativelabs/kube-router/master/daemonset/kubeadm-kuberouter.yaml инициализировать сеть кластера
+kubeadm join 192.168.0.13:6443 --token jrcyj4.3m1aiy2143jmiefz \
+        --discovery-token-ca-cert-hash sha256:345f70e1451a1ae6e290078007845670fe2b4f1dc8a6b521b4fae65a20d1e095 (привязать nody к master) (запустить на всех nodes)
+kubectl get nodes --show-labels показать labels всего кластера
+kubectl label node node3 node-role.kubernetes.io/worker=  установить label для "node3" как "worker"
+
+kubernetes остановить нельзя, только создать или убить (есть upscaling который их перезапустит автоматически если остановить серевер вручную)
+~/.kube/config настройки kubectl
+
+#немного docker 
+docker build -t myk8sapp . собрать docker image
+docker tag myk8sapp:latest antik94/k8sphp:latest переименовать image для загрузки в dockerhub
+docker login авторизация в docker hub
+docker push antik94/k8sphp:latest загрузить image в dockerhub
+docker run -it -p 1234:80 antik94/k8sphp запустить image
+docker rmi <sha1 image> -f удалить все image который зависим от этого
+docker system prune очистить все неиспользуемые ресурcы docker (изображения, кеш)
+
+# главные объекты k8s
+0. Container - docker container
+1. pod - объект в котором работает один или больше containers
+2. Deployment - сэт одинковых pods, нужен для auto scalling и для обновления container image, держит минимальное количество работающих pods
+3. Service - предоставляет доступ к Deployment через:
+	-> ClusterIP
+	-> NodePort
+	-> LoadBalancer
+	-> ExternalName
+4. Nodes - Сервера где все это работает 
+
+# работа с pods
+kubectl get pods (kubectl get pod) получить список pods
+kubectl run hello --image=antik94/k8sphp:latest --port=80 создать и запустить image в pod "hello"
+kubectl delete pods hello удалить pod "hello"
+kubectl describe pods hello узнать информацию о pod "hello"
+kubectl exec hello -- зайти в pod и выполнить команду "date" (текущее время)
+kubectl exec -it hello -- bash интерактив с pod "hello"
+kubectl logs hello посмотреть логи pod "hello"
+kubectl port-forward hello 7788:80 перенаправить локальный порт 7788 в 80 pod "hello" (из внешки --adress=0.0.0.0)
+kubectl apply -f .\pod-my-web-v1.yaml создать конфигурацию из файла
+kubectl delete -f .\pod-my-web-v1.yaml удалить pod
+
+Сами по себе pods используются только в обучении и тестировании, если сервер на котором запущены pods умрет, заново они не поднимутся. Если возобновить сервер с этими настройками, они поднимутся
+
+# работа с Deployments
+kubectl get deployments (псевдоним kubectl get deploy) показать deployments
+kubectl create deployment first-deployment --image=antik94/k8sphp:latest создать deployment "first-deployment"
+kubectl delete deployment first-deployment удалить deployment
+kubectl delete deployment --all убить все deployment
+kubectl describe deployments first-deployment вывести информацию о deployments
+kubectl scale deployment first-deployment --replicas=4 сделать реплику deployment до 4 
+kubectl get rs (псевдоним kubectl get replicaset) получить инфомацию о репликах
+kubectl autoscale deploy first-deployment --min=4 --max=6 --cpu-percent=80 включить авто скалинг при превышении процессора
+kubectl get hpa (kubectl get horizontalpodautoscaler) посмотреть информацию об autoscale
+kubectl rollout history Deployment/first-deployment посмотреть историю deployments на "first-deployment"
+kubectl rollout status Deployment/first-deployment посмотреть статус deployment
+kubectl set image deployment/first-deployment k8sphp=adv4000/k8sphp:version1 обновить image в deployment
+kubectl rollout undo deployment/first-deployment откатить на предыдущую версию
+kubectl rollout undo deployment/first-deployment --to-revision=1 откатить на n ревизию
+kubectl rollout restart deployment/first-deployment обновить версию приложение (latest image)
+
+#работа с services
+
+При создании Service, ваше приложение будет доступно  по:
+	* ClusterIP - IP только внутри k8s cluster (default)
+	* NodePort - Определенный Порт на всех k8s worker nodes
+	* ExternalName - DNS CNAME Record
+	* LoadBalancer - только в Cloud Clusters (AWS, GCP, Azure)
+
+kubectl create deployment second-deployment --image antik94/k8sphp:latest создаем deploy
+kubectl scale deployment second-deployment --replicas 3 делаем scale
+
+kubectl expose deploy second-deployment --type=ClusterIP --port 80 делаем сервис доступно по ip
+kubectl expose deploy second-deployment --type NodePort --port 80 доступно по порту из внешки
+kubectl expose deploy second-deployment --type LoadBalancer --port 80 создать service как load balancer
+kubectl get services (kubectl get svc) получить список сервисов
+kubectl get svc -o wide (c selector)
+kubectl delete svc second-deployment удалить сервис
+kubectl describe nodes получить расширенную информацию по nodes
+
+
+# работа с ingress controller
+Проекты ingress controllers:
+	https://github.com/kubernetes/ingress-nginx
+	https://github.com/jcmoraisjr/haproxy-ingress
+	https://github.com/projectcontour/contour (Envoy proxy)
+	https://github.com/traefik/traefik (Cloud Native Application Proxy)
+	https://github.com/istio/istio
+	https://github.com/kubernetes-sigs/aws-load-balancer-controller (AWS Elastic Load Balancers)
+	https://github.com/kubernetes/ingress-gce (Google cloud)
+	https://github.com/Azure/application-gateway-kubernetes-ingress (Azure)
+Их сравнение https://docs.google.com/spreadsheets/d/191WWNpjJ2za6-nbG4ZoUMXMpUK8KlCIosvQB0f-oq3k/edit
+
+1. Установим ingress controller "contour"
+kubectl apply -f https://projectcontour.io/quickstart/contour.yaml
+kubectl get svc -n projectcontour проверим что все работает
+kubectl get pods -n projectcontour -o wide проверим что все работает
+2. Сделаем deploy
+kubectl create deploy main --image adv4000/k8sphp:latest
+kubectl create deploy web1 --image adv4000/k8sphp:version1
+kubectl create deploy web2 --image adv4000/k8sphp:version2
+kubectl create deploy webx --image adv4000/k8sphp:versionx
+kubectl create deploy tomcat --image tomcat:8.5.38
+2. Сделаем services
+kubectl expose deploy main --port 80
+kubectl expose deploy web1 --port 80
+kubectl expose deploy web2 --port 80
+kubectl expose deploy webx --port 80
+3. настроим ingress controller (предварительно нстроим manifest файл ingress-hosts.yaml)
+kubectl get ingress получить список ingress controller
+kubectl describe ingress получить расширенное описание об ingress
+
+Для minicube инструкция здесь
+https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/
+
+kubectl get namespaces получить список namespaces
