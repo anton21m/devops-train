@@ -1,17 +1,17 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ingress-hosts
+  name: ingress-paths
   labels:
-    app: ingress-paths
+    app: ingress-second
 spec:
-  ingressClassName: ingress-paths
+  # ingressClassName: ingress-paths
   rules:
-    - host: www.test.dev
+    - host: www.test.loc
       http:
         paths:
-          - pathType: Prefix
-            path: /page1
+          - path: "/page1"
+            pathType: Prefix
             backend:
               service:
                 name: webx

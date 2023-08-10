@@ -4,10 +4,12 @@ metadata:
   name: ingress-hosts
   labels:
     app: ingress-first
+  # annotations:
+  #   nginx.ingress.kubernetes.io/rewrite-target: /$1
 spec:
-  ingressClassName: ingress-example
+  # ingressClassName: ingress-example
   rules:
-    - host: www.test.dev
+    - host: www.test.loc
       http:
         paths:
           - pathType: Prefix
@@ -18,7 +20,7 @@ spec:
                 port: 
                   number: 80
 
-    - host: web1.test.dev
+    - host: web1.test.loc
       http:
         paths:
           - pathType: Prefix
@@ -28,7 +30,7 @@ spec:
                 name: web1
                 port: 
                   number: 80
-    - host: web2.test.dev
+    - host: web2.test.loc
       http:
         paths:
           - pathType: Prefix
@@ -38,7 +40,7 @@ spec:
                 name: web2
                 port: 
                   number: 80
-    - host: tomcat.test.dev
+    - host: tomcat.test.loc
       http:
         paths:
           - pathType: Prefix

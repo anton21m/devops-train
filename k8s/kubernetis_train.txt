@@ -137,12 +137,15 @@ kubectl create deploy web1 --image adv4000/k8sphp:version1
 kubectl create deploy web2 --image adv4000/k8sphp:version2
 kubectl create deploy webx --image adv4000/k8sphp:versionx
 kubectl create deploy tomcat --image tomcat:8.5.38
-2. Сделаем services
+3. Сделаеем scale
+kubectl scale deploy main web1 web2 webx --replicas 2
+4. Сделаем services
 kubectl expose deploy main --port 80
 kubectl expose deploy web1 --port 80
 kubectl expose deploy web2 --port 80
 kubectl expose deploy webx --port 80
-3. настроим ingress controller (предварительно нстроим manifest файл ingress-hosts.yaml)
+kubectl expose deploy tomcat --port 8080
+5. настроим ingress controller (предварительно нстроим manifest файл ingress-hosts.yaml)
 kubectl get ingress получить список ingress controller
 kubectl describe ingress получить расширенное описание об ingress
 
