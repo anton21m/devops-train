@@ -1,0 +1,62 @@
+#немного docker от adv-it
+docker build -t myk8sapp . - собрать docker image
+docker tag myk8sapp:latest antik94/k8sphp:latest - переименовать image для загрузки в dockerhub
+docker login авторизация в docker hub
+docker push antik94/k8sphp:latest загрузить image в dockerhub
+docker run -it -p 1234:80 antik94/k8sphp запустить image
+docker rmi <sha1 image> -f удалить все image который зависим от этого
+docker system prune очистить все неиспользуемые ресурcы docker (изображения, кеш)
+
+# от слерм курса
+https://www.youtube.com/watch?v=TJg7QpqCH70&list=PL8D2P0ruohOA4Y9LQoTttfSgsRwUGWpu6&index=3
+docker search <<name>> - поиска образа в регистри
+docker pull <<name>> - скачать образ из регтстри
+docker build <</path/to/dir>> - собрать образ
+docker run <<name>> - запустить контейнер
+docker rm <<name>> - удалить контейнер
+docker ps <<name>> - список работающих контейнеров
+docker logs <<name>> - логи контейнера
+docker start/stop/restart <<name>> - работа с контейнером
+docker inspect <<name>> - инспектировать контейнер
+docker logs <<name>> - логи контейнера
+docker run <<name>> --rm - удалить контейнер после завершения
+docker exec -it <<name>> bash - зайти в контейнер
+
+---
+В DockerFile
+
+Расзличие COPY и ADD
+COPY index.html /var/www/html копирование файла в docker
+COPY --from=build /bin/project /bin project копировать из предыдущего образа
+ADD https://example.com/big.tar.xz /usr/src/things/ добавить файл в docker из вне распаковав его из архива
+
+WORKDIR /var/www/ рабочая папка (создается если не существует)
+
+ENV FOO BAR - присвоить ключу, значение переменной 
+
+Docker использует контейнеры OCI https://opencontainers.org/ и использует runc (runc -v) для взаимодействия!!!
+
+Docker состоит из трех проектов: (https://habr.com/ru/companies/domclick/articles/566224/)
+    docker-cli: утилита командной строки, с которой вы взаимодействуете с помощью команды docker.
+    containerd: Linux Daemon, который управляет контейнерами и запускает их. Он загружает образы из репозитория, управляет хранилищем и сетью, а также контролирует работу контейнеров.
+    runc: низкоуровневая среда выполнения контейнеров, которая создает и запускает контейнеры.
+
+
+Существует помимо Docker, CRI-O (https://cri-o.io/), POdman(https://podman.io/) контейнеры
+
+docker/slurm-2/nginx-server - оригинальный docker образ nginx
+docker/slurm-2/nginx-test/Dockerfile - неоптимизированный образ nginx 
+docker/slurm-2/nginx-test/DockerfileV2 - оптимизированный docker образ nginx
+docker/slurm-2/Dockerfile.MultiStage - образ для компиляции и scatch для запуска
+
+
+Механизмы контейнеризации: unshare,  netns, systemd-cgls
+
+Полезные ссылки:
+    https://fabiokung.com/2014/03/13/memory-inside-linux-containers/
+    https://docs.docker.com/config/containers/resource_constraints/
+    https://habr.com/ru/company/selectel/blog/279281/
+
+    https://www.buzzwrd.me/index.php/2021/03/10/creating-lxc-containers-from-docker-and-oci-images/ (LXC и docker)
+
+    

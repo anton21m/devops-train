@@ -44,15 +44,6 @@ kubectl label node node3 node-role.kubernetes.io/worker=  установить l
 kubernetes остановить нельзя, только создать или убить (есть upscaling который их перезапустит автоматически если остановить серевер вручную)
 ~/.kube/config настройки kubectl
 
-#немного docker 
-docker build -t myk8sapp . собрать docker image
-docker tag myk8sapp:latest antik94/k8sphp:latest переименовать image для загрузки в dockerhub
-docker login авторизация в docker hub
-docker push antik94/k8sphp:latest загрузить image в dockerhub
-docker run -it -p 1234:80 antik94/k8sphp запустить image
-docker rmi <sha1 image> -f удалить все image который зависим от этого
-docker system prune очистить все неиспользуемые ресурcы docker (изображения, кеш)
-
 # главные объекты k8s
 0. Container - docker container
 1. pod - объект в котором работает один или больше containers
@@ -153,3 +144,18 @@ kubectl describe ingress получить расширенное описани�
 https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/
 
 kubectl get namespaces получить список namespaces
+
+# работа с helm charts
+helm create test-charts Создать chart автоматически (можно вручную)
+helm install App App-HelmChart/ -f prod_values.yaml Применить измения из файла с переменными prod_values
+helm install App App-HelmChart/ --set container.image=adv4000/k8sphp:version2 Применить изменения изменив изображение контейнера (override)
+helm upgrade App .\chart\ --set container.image=antik94/k8sphp:latest Обновить изменения
+helm list показать список deployment которые были сделаны через helm
+helm package .\chart\ запаковать helm chart в архив
+helm install app4 .\App-HelmChart-0.1.0.tgz запустить helm chart из архива
+helm search repo искать helm charts в репозитории 
+helm search hub  apache искать apache в helm hub
+helm repo add bitnami https://charts.bitnami.com/bitnami добавить репозитарий bitnami в helm
+helm install website-apache oci://registry-1.docker.io/bitnamicharts/apache инсталлировать chart из репозитария
+helm install custom-apache oci://registry-1.docker.io/bitnamicharts/apache -f apache-mywebpage.yaml инсталлировать пакет и перезаписать переменные из файла
+helm uninstall my-release (helm delete) удалить релиз (все pods,deploy,svc)

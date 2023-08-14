@@ -1,0 +1,6 @@
+# docs from https://github.com/bitnami/charts/tree/main/bitnami/apache/#installing-the-chart
+# helm install custom-apache oci://registry-1.docker.io/bitnamicharts/apache -f apache-mywebpage.yaml
+cloneHtdocsFromGit:
+  enabled: true #	Get the server static content from a git repository	false
+  repository: https://github.com/adv4000/simplewebpage #	Repository to clone static content from	""
+  branch: main #	Branch inside the git repository	""
