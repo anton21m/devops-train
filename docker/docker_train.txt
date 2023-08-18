@@ -6,6 +6,7 @@ docker push antik94/k8sphp:latest загрузить image в dockerhub
 docker run -it -p 1234:80 antik94/k8sphp запустить image
 docker rmi <sha1 image> -f удалить все image который зависим от этого
 docker system prune очистить все неиспользуемые ресурcы docker (изображения, кеш)
+docker stats посмотреть информацию по памяти, процессору, обращения диска по контейнерам
 
 # от слерм курса
 https://www.youtube.com/watch?v=TJg7QpqCH70&list=PL8D2P0ruohOA4Y9LQoTttfSgsRwUGWpu6&index=3
@@ -21,6 +22,8 @@ docker inspect <<name>> - инспектировать контейнер
 docker logs <<name>> - логи контейнера
 docker run <<name>> --rm - удалить контейнер после завершения
 docker exec -it <<name>> bash - зайти в контейнер
+
+Запуск docker без sudo - https://www.baeldung.com/linux/docker-run-without-sudo
 
 ---
 В DockerFile
@@ -51,6 +54,14 @@ docker/slurm-2/Dockerfile.MultiStage - образ для компиляции и
 
 
 Механизмы контейнеризации: unshare,  netns, systemd-cgls
+
+Создание собственного базового образа docker
+https://www.dmosk.ru/miniinstruktions.php?mini=docker-base-image
+На примере kali linux:
+    apt install debootstrap
+    debootstrap kali-dev kali-linux https://http.kali.org/ скачиваем образ
+    tar -C kali-linux -c . | docker import - my-kali-linux:base паркуем его в docker
+
 
 Полезные ссылки:
     https://fabiokung.com/2014/03/13/memory-inside-linux-containers/

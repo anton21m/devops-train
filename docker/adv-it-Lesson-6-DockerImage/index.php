@@ -6,4 +6,4 @@ echo "Server IP Address is: $ip_server" . "<br>
 <p>";                                          
 echo "Made by <font color=blue>Anton Shumeyko";
                                                
-?>                                             
+?>

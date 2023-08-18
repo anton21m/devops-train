@@ -1,0 +1,75 @@
+version: '3.7'
+services:
+  web:
+    image: 'gitlab/gitlab-ce:16.2.4-ce.0'
+    # restart: unless-stopped
+    hostname: 'git.example.com'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url = "http://git.example.com/"
+        postgresql['shared_buffers'] = "256MB"
+        puma['worker_processes'] = 0
+        sidekiq['concurrency'] = 2
+        sidekiq['max_concurrency'] = 5
+        prometheus_monitoring['enable'] = false
+        gitlab_rails['env'] = {
+          'MALLOC_CONF' => 'dirty_decay_ms:1000,muzzy_decay_ms:1000'
+        }
+        
+        gitaly['env'] = {
+          'MALLOC_CONF' => 'dirty_decay_ms:1000,muzzy_decay_ms:1000'
+        }
+        gitlab_rails['gitlab_shell_ssh_port'] = 2224
+        # enable gitlab registry 
+        registry_external_url 'http://reg.gitlab.example.com'
+        gitlab_rails['registry_enabled'] = true
+        registry['enable'] = true
+        gitlab_rails['registry_host'] = "reg.gitlab.example.com"
+      GITLAB_ROOT_PASSWORD: "AS33fg65y6yy" # cat /etc/gitlab/initial_root_password
+    ports:
+      - '80:80' #http web interface
+      - '2224:22' #ssh
+    volumes:
+      - './config:/etc/gitlab'
+      - './logs:/var/log/gitlab'
+      - './data:/var/opt/gitlab'
+    shm_size: '512m' # x2 from minimum
+    mem_limit: '4g'
+    mem_reservation: '1g'
+    networks:
+      - my-network
+    
+  runner-docker:
+    image: gitlab/gitlab-runner:latest
+    restart: unless-stopped
+    volumes:
+      - ./runner-config1:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - my-network
+    privileged: true
+
+    # --cap-add=NET_ADMIN
+    # apt update && apt install iptables
+
+#     iptables -P OUTPUT DROP
+# $iptables -I OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+# $iptables -I OUTPUT -m state --state INVALID -j DROP
+# Solve the problem to need add the next rule:
+# $iptables -A OUTPUT -d 172.20.0.0/16 -j ACCEPT
+
+  # mshk_gitlab-runner1:
+  #   image: idoall/gitlab-runner:alpine-v${VERSION}
+  #   volumes: ["gitlab-runner1-config:/etc/gitlab-runner:Z", "/var/run/docker.sock:/var/run/docker.sock"]
+  # mshk_gitlab-runner2:
+  #   image: idoall/gitlab-runner:alpine-v${VERSION}
+  #   volumes: ["gitlab-runner2-config:/etc/gitlab-runner:Z", "/var/run/docker.sock:/var/run/docker.sock"]
+  # mshk_gitlab-runner3:
+  #   image: idoall/gitlab-runner:alpine-v${VERSION}
+  #   volumes: ["gitlab-runner3-config:/etc/gitlab-runner:Z", "/var/run/docker.sock:/var/run/docker.sock"]
+
+networks:
+  my-network:
+    driver: bridge
+
+# 172.20.0.0/16

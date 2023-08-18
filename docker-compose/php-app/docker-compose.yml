@@ -1,12 +1,15 @@
 # docker-compose up -d
+# curl -H "Host: docker.marsel.host" http://localhost:80
+# curl -H "Host: docker.marsel.host" http://localhost:80/phpinfo
 version: "2.3"
 services:
   nginx:
     build: ./nginx
+    image: compose_nginx #name create image
     ports:
       - "80:80"
     volumes:
-      - ./www:/var/www
+      - ./www:/var/www #nginx handler
     depends_on:
       php:
         condition: service_healthy #check 
@@ -14,8 +17,9 @@ services:
       - ENV=development
   php:
     build: ./php
+    image: compose_php #name create image
     volumes:
-      - ./www:/var/www
+      - ./www:/var/www #php handler
     healthcheck:
       test: ["CMD", "php-fpm", "-t"] 
       interval: 3s

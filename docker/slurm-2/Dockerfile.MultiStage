@@ -1,10 +1,12 @@
 #  docker build -t w -f Dockerfile.MultiStage .
+# Это приложение не может быть скомпилировано, это пример
+
 FROM golang:alpine3.18 AS build
 
 # install tools required for project
 # run "docker build --no-cache" to update dependencies
 RUN apk add --no-cache git
-RUN go install github.com/golang/dep/cmd/dep
+RUN go get github.com/golang/dep/cmd/dep
 
 # list project dependencies with gopkg.toml and gopkg.lock
 # these layers are only re-built when Gopkg files are updates

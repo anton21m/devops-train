@@ -1,20 +1,21 @@
+# docker-compose -f docker-compose.production.yml up -d
 version: "2.3"
 services:
   nginx:
-    build: ./nginx
+    image: compose_nginx #finish image from registry
     ports:
       - "80:80"
-    volumes:
-      - ./www:/var/www
+    # volumes:
+    #   - ./www:/var/www
     depends_on:
       php:
         condition: service_healthy #check 
     environment:
-      - ENV=development
+      - ENV=production
   php:
-    build: ./php
-    volumes:
-      - ./www:/var/www
+    image: compose_php #finish image from registry
+    # volumes:
+    #   - ./www:/var/www
     healthcheck:
       test: ["CMD", "php-fpm", "-t"] 
       interval: 3s

@@ -12,8 +12,8 @@ RUN apk add --no-cache \
 EXPOSE 80
 
 # часто изменяемые слои вниз
-COPY custom.conf /etc/nginx/conf.d/
+COPY custom.conf /etc/nginx/http.d/
 
-COPY . /opt/
+COPY www /var/www
 
 CMD ["nginx", "-g", "daemon off;"]
