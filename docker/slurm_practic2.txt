@@ -1,0 +1,82 @@
+### Закрепляем тему Docker Volume
+
+1) Соберем образ с *Redis*, который использует *volume*;
+
+```
+docker build -t redis_1 -<<EOF
+FROM redis 
+VOLUME /data
+
+EOF
+```
+
+2) Запустим контейнер и посмотрим какие *volume'ы* есть:
+
+```
+docker run --rm -d --name redis_1 redis_1
+docker volume 1s
+```
+
+3) Нас не устраивает имя *volume*. Остановим контейнер командой `docker stop redis_1`
+ 
+4) запустим снова контейнер из этого образа, но передам параметры подключения *volume*: 
+
+```
+docker run --rm --name redis_1 -d --mount type=volume,source=data,destination=/data redis_1
+docker volume ls
+```
+
+5) Смотрим теперь список volume'ов, смотрим его физическое расположение на хосте:
+
+```
+docker volume 1s
+1l /var/lib/docker/volumes/data/_data/
+```
+
+6) зайдем внутрь контейнера, создадим там ключ, запишем его в *Redis*, убедимся что создался и выйдем:
+
+```
+docker exec -it redis_1 bash
+redis-cli
+set mykey foobar
+get mykey
+save
+exit
+1s
+exit
+```
+
+7) Посмотрим физическое содержание папки нашего *volume*:
+
+`ls /var/lib/docker/volumes/data/_data/`
+
+8) Остановим наш контейнер и проверим доступность *volume*:
+
+```
+docker stop redis_1
+docker volume 1s
+```
+
+9) Запустим снова наш контейнер и убедимся что наш созданный ключ не пропал:
+
+```
+docker run --rm --name redis_1 -d --mount type=volume,source=data,destination=/data redis_1 
+docker exec -it redis_1 bash
+redis-cli
+get mykey
+exit
+exit
+```
+
+**САМОСТОЯТЕЛЬНАЯ РАБОТА:**
+- Запустите контейнер с именем redis_2 из образа redis_1 который будет использовать тот же самый volume
+- Для проверки что все получилось зайдите внутрь контейнера redis_2 и в redis_cli и выполните "get mykey"
+- Если вы все сделали верно, то отдастся значение foobar.
+
+10) Прибираемся за собой:
+
+```
+docker stop $(docker ps -q)
+docker volume ls
+docker volume rm data
+```

@@ -1,0 +1,71 @@
+### Закрепляем тему Docker Compose 
+
+1) Устанавливаем *Docker-compose*:
+
+```
+yum install docker-compose -y
+docker-compose version
+```
+
+2) Клонируем себе репозиторий с практикой 
+(2023 год этого репозитария там уже нет):
+
+```
+cd /srv
+git clone git@gitlab.slurm.io:school/slurm.git 
+```
+
+3) Переходим в каталог с практикой:
+
+`cd /srv/slurm/1.Docker/compose`
+
+4) запустим наш проект. Это приложение на *Python/Flask*, которое считает количество обращений к нему:
+
+```
+docker-compose up -d
+curl 127.0.0.1 пару раз
+```
+
+5) Смотрим наши *volume'ы* и видим что снова непонятное имя:
+
+`docker volume ls`
+
+6) останавливаем проект, удаляем *volume*, смотрим соседний файл *compose'a*:
+
+```
+docker-compose down
+docker volume rm имя_volume'а
+
+cat docker-compose.yml_vol
+```
+
+7) Запускаем проект из этого файла.
+
+`docker-compose -f docker-compose.yml_vol up -d`
+
+8) Проверим что наши данные о посещении сохраняются. Сделаем пару обращений к приложению
+и остановим его, снова поднимем и снова сделаем пару обращений:
+
+```
+curl 127.0.0.1 пару раз
+docker-compose down
+docker-compose -f docker-compose.yml_vol up -d
+curl 127.0.0.1 пару раз
+```
+
+10) Погасим наше приложение: `docker-compose down`
+
+**САМОСТОЯТЕЛЬНАЯ РАБОТА:**
+
+- Запустить это же приложение, но с *healthcheck'ом* сервиса *redis'a* через команду `redis-cli ping`
+- Старт сервиса *web* сделать зависимым от здоровья сервиса *redis*
+- Также ограничить через *compose-файл* сервису *redis* *RAM до 500 МБ и CPU до 0,5* 
+- Проверить что все получилось можно сделав после запуска и получив значения:
+
+```
+docker inspect compose_redis_1 | grep "Memory\|NanoCpus"
+
+	"Memory": 524288000,
+	"NanoCpus": 500000000,
+```
+- либо использовав для проверки утилиту cgget.

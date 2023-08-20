@@ -64,10 +64,13 @@ https://www.dmosk.ru/miniinstruktions.php?mini=docker-base-image
 
 
 Полезные ссылки:
-    https://fabiokung.com/2014/03/13/memory-inside-linux-containers/
-    https://docs.docker.com/config/containers/resource_constraints/
-    https://habr.com/ru/company/selectel/blog/279281/
+    https://fabiokung.com/2014/03/13/memory-inside-linux-containers/ про память внутри linux containers
+    https://docs.docker.com/config/containers/resource_constraints/ контроль и ограничение ресурсов в docker
+    https://habr.com/ru/company/selectel/blog/279281/ Механизмы контейнеризации: namespaces
 
     https://www.buzzwrd.me/index.php/2021/03/10/creating-lxc-containers-from-docker-and-oci-images/ (LXC и docker)
 
-    
+    https://docs.docker.com/develop/develop-images/baseimages/ создание своего базового образа docker
+    https://habr.com/ru/company/southbridge/blog/329138/ docker ENTRYPOINT vs CMD
+
+

@@ -1,0 +1,164 @@
+### Закрепляем тему namespace / cgroups
+
+1) Смотрим PID своей оболочки *bash* и его *namespaces*:
+```
+ls -1 /proc/$$/ns
+echo $$
+ps aux | grep номер_пида
+```
+
+2) Смотрим какие текущие *namespaces* есть в системе через `lsns`. Знакомимся с утилитой `unshare`
+
+```
+lsns
+unshare --help
+```
+
+3) **В консоли № 2** отделяем процесс *bash* в отдельный *UTS namespace* и смотрим что он действительно изменился
+
+```
+unshare -u bash
+ls -1 /proc/$$/ns <--- в обоих консолях
+```
+
+4) Изменим hostname в **консоли № 2** и проверим что в консоли № 1 он не поменялся:
+
+```
+hostname testhost <--- в консоли № 2 
+hostname <--- в консоли № 2
+
+hostname <--- в консоли № 1
+```
+
+5) в **консоли № 1** выполняем команду `lsns` и видим новый *namespace* созданный нами с процессом *bash*:
+
+6) Выходим из запущенной ранее оболочки bash на **консоли № 2**. Смотрим текущие процессы в консоли № 2** и сетевое окружение
+
+```
+exit
+ps aux
+ip a
+```
+
+7) в **консоли № 2** поместим теперь процесс *bash* в несколько *namespace'ов*:
+
+`unshare --pid --net --fork --mount-proc /bin/bash`
+
+8) Снова смотрим в **консоли № 2** процессы и сетевое окружение. Видим что наш *bash* изолирован. Затем выходим из запущенного *bash*:
+
+```
+ps aux
+ip a
+exit
+```
+
+9) Устанавливаем *Docker*:
+
+```
+yum install -y yum-utils
+yum-config-manager \
+	--add-repo \
+	https://download.docker.com/linux/centos/docker-ce.repo
+	
+yum install -y docker-ce docker-ce-cli containerd.io
+systemctl enable --now docker && systemctl status docker
+```
+
+10) Убеждаемся что все ОК. Посмотрим запущенные контейнеры. Так как мы ничего не запускали, Команда выведет пустую табличку:
+
+`docker ps`
+
+11) Соберем наш первый образ на базе *Alpine*, который будет пинговать *8.8.8.8*:
+
+```
+docker build -t test -<<EOF
+FROM alpine
+ENTRYPOINT ["ping"]
+CMD ["8.8.8.8"]
+EOF
+```
+
+12) запустим контейнер из собранного образа: `docker run --name test --rm -d test`
+
+13) Посмотрим какие *namespace* создал *Docker*, запомним *PID* процесса нашего контейнера:
+
+`lsns`
+
+14) Войдем внутрь контейнера, проверим запущенные процессы и сетевое окружение. Затем выйдем из него:
+
+```
+docker exec -it test /bin/sh
+ps aux
+ip a
+exit
+```
+
+15) Теперь воспользуемся утилитой *nsenter* чтобы подключиться к *namespace'ам* этого контейнера. Используем номер *PID* этого контейнера:
+
+`nsenter -t номер_пида --pid --net --mount --ipc --uts sh`
+
+16) Убедимся что мы видим тоже самое окружение как если бы использовали *docker exec*:
+
+```
+ps aux
+ip a
+exit
+```
+
+17) Соберем еще один образ:
+
+```
+docker build -t test_resource -<<EOF
+FROM alpine
+ENTRYPOINT ["sleep"]
+CMD ["3600"]
+EOF
+```
+
+18) Запустим контейнер из этого образа, но наложим на него ограничения по ресурсам в *100мб ОЗУ* и *0,2 CPU*:
+
+`docker run --name test_resource --memory=100m --cpus=".2" --rm -d test_resource`
+
+19) воспользуемся утилитой systemd-cgls чтобы посмотреть текущие *cgroups*. Находим там *SHA нашего контейнера и идем в папку его *cgroup* по памяти:
+
+```
+systemd-cgls <--- находим тут SHA нашего контейнера
+cd /sys/fs/cgroup/memory/docker/SHA_контейнера
+```
+
+20) убеждаемся что в cgroup контейнера действительно есть заданные ограничения:
+
+`cat memory.limit_in_bytes | awk '{$1=$1/1024/1024; print}'`
+
+21) убеждаемся что наш процесс действительно в этой *cgroup*:
+
+`cat tasks`
+
+22) Проверим ограничения по *CPU*:
+
+`cd /sys/fs/cgroup/cpu/docker/SHA_контейнера`
+
+23) Смотрим что ограничения есть:
+
+`cat cpu.cfs_quota_us`
+
+24) Ставим *libcgroup*
+
+`yum install libcgroup-tools -y`
+
+25) Посмотрим *cgroups* нашего контейнера через утилиту от *libcgroup*:
+
+`cgget docker/SHA_контейнера`
+
+26) Через передачу ключа -r можно посмотреть конкретный параметр *cgroup'ы*:
+
+`cgget -r memory.limit_in_bytes docker/SHA_контейнера`
+
+**САМОСТОЯТЕЛЬНАЯ РАБОТА:**
+
+- Запустить контейнер с именем test_limit из образа test_resource с ограничением в 200 Мб ОЗУ и 0,5 CPU
+- Получить через утилиту cgget значения memory.limit_in_bytes и cpu.cfs_quota_us этого контейнера
+- Они должны быть равны 209715200 и 50000 соответственно
+
+27) Останавливаем запущенные ранее контейнеры docker stop $(docker ps - g) и можно закрыть **консоль № 2 **
+

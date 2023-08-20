@@ -1,0 +1,21 @@
+# code from https://docs.docker.com/compose/gettingstarted/
+# docker-compose -f docker-compose_vol.yml up -d
+version: "2.4"
+services:
+  web:
+    build: .
+    ports:
+      - "80:5000"
+    volumes: 
+      - .:/code
+    environment:
+      FLASK_ENV: development
+  redis:
+    image: "redis:alpine"
+    volumes:
+      - type: volume
+        source: mydata #name volume
+        target: /data # target inside docker
+
+volumes:
+  mydata:

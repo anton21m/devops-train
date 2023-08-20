@@ -7,4 +7,10 @@ docker-compose ps - вывести список контейнеров
 docker-compose exec <<service name>> <<command>> выполнить команду в контейнере
 docker-compose images - список образов
 
-docker-compose -f docker-compose.yml -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from test завершить все контейнеры в случае ошибки (используется для тестирования)
+docker-compose -f docker-compose.yml -f docker-compose.test.yml up \
+    --abort-on-container-exit --exit-code-from test завершить все контейнеры в случае ошибки (используется для тестирования)
+
+https://medium.com/southbridge/ci-cd-%D0%BF%D1%80%D0%B8%D0%BD%D1%86%D0%B8%D0%BF%D1%8B-%D0%B2%D0%BD%D0%B5%D0%B4%D1%80%D0%B5%D0%BD%D0%B8%D0%B5-%D0%B8%D0%BD%D1%81%D1%82%D1%80%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B-f0626b9994c8 - про CI/CD в целом
+https://docs.docker.com/compose - о композиторе
+https://docs.docker.com/compose/gettingstarted/ - начало работы с контейнером
+https://docs.gitlab.com/ee/ci/docker/using_docker_build.html использование docker build в gitlab ci

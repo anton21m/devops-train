@@ -1,0 +1,33 @@
+# code from https://docs.docker.com/compose/gettingstarted/
+# docker-compose -f docker-compose_dz.yml up -d
+# docker inspect flask-app_redis_1 | grep "Memory\|NanoCpus"
+version: "2.4"
+services:
+  web:
+    build: .
+    ports:
+      - "80:5000"
+    volumes: 
+      - .:/code
+    environment:
+      FLASK_ENV: development
+    depends_on:
+      redis:
+        condition: service_healthy
+  redis:
+    image: "redis:alpine"
+    mem_limit: "500m"
+    cpus: ".5"
+    volumes:
+      - type: volume
+        source: mydata #name volume
+        target: /data # target inside docker
+    healthcheck:
+      test: ["CMD","redis-cli", "ping"]
+      interval: 5s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  mydata:
