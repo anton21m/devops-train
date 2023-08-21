@@ -1,0 +1,50 @@
+# файл с deployment содержит probes, и ограничение ресурсов
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: my-app
+  strategy:
+    rollingUpdate:
+      maxSurge: 1 # max new
+      maxUnavailable: 1 
+    type: RollingUpdate
+  template: 
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+        - image: nginx:1.12
+          name: nginx
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            failureThreshold: 3 # count unsuccess try before off balancer
+            httpGet: # run command
+              path: /
+              port: 80
+            periodSeconds: 10 # pause
+            successThreshold: 3 # count reset, after count success try
+            timeoutSeconds: 1 # timeout error
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 80
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+            initialDelaySeconds: 10 # begin check from 10 seconds, after run pods
+          resources:
+            requests:
+              cpu: 100m #mili
+              memory: 100Mi
+            limits: #reservation
+              cpu: 100m
+              memory: 100Mi

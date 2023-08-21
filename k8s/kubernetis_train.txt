@@ -53,7 +53,7 @@ kubernetes остановить нельзя, только создать или
 	-> NodePort
 	-> LoadBalancer
 	-> ExternalName
-4. Nodes - Сервера где все это работает 
+4. Nodes - Сервера где все это работает
 
 # работа с pods
 kubectl get pods (kubectl get pod) получить список pods
