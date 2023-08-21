@@ -2,6 +2,8 @@
 
 kubectl edit <resource> <name> редактировать ресурс kubernetes
 kubectl set image deploy my-deployment '*=nginx:1.14' обновить image в deploy
+kubectl explain описание полей и структуры ресурса (посмотреть api версию)
+kubectl explain deploy.spec углубиться в структуру
 
 
 ---- стратегии обновления deployment в kubernetes
