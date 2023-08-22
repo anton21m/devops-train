@@ -1,0 +1,46 @@
+Установка bash completion для kubectl
+https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/#enable-shell-autocompletion
+kubectl completion -h вывести информацию о поддерживаемом дополнении
+kubectl completion bash | sudo tee /etc/bash_completion.d/kubectl > /dev/null
+sudo chmod a+r /etc/bash_completion.d/kubectl 
+Все готово теперь работает автодополнение
+
+https://github.com/kelseyhightower/kubernetes-the-hard-way тяжелый путь установки kubernetes
+
+-------------------------------------------------------------
+
+kubectl deletete pod --all удалить все поды
+kubectl get replicasets.apps (kubectl get rs) посмотреть все replicasets
+
+kubectl get pod --show-labels посмотреть pods с label
+
+kubectl scale --replicas=2 replicaset my-replicaset сделать реплики для пода 2 штуки
+
+
+kubectl edit <resource> <name> редактировать ресурс kubernetes
+kubectl set image deploy my-deployment '*=nginx:1.14' обновить image в deploy
+kubectl explain описание полей и структуры ресурса (посмотреть api версию)
+kubectl explain deploy.spec углубиться в структуру
+
+kubectl delete all --all удалить все объекты из кластера
+kubectl rollout undo deployment my-deployment --to-revision 1 откатить на 2 версии назад
+
+
+replicaset не может обновлять изображения в горячем режиме
+
+https://kubernetes.io/docs/concepts/configuration/manage-resources-containers статья об ограничении ресурсов и эфемерном хранилище в kubernetes
+https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/ описание liveness, readiness и started probes в kubernetes
+https://kubernetes.io/docs/concepts/workloads/controllers/deployment описание deployment
+https://kubernetes.io/docs/tasks/configure-pod-container/quality-service-pod/ описание типов QoS 
+
+OOM killer сначала убивает приложения с QoS классом BestEffort (ограничения не заданы). Затем Burstable (разные request и limit). И только в конце Guaranteed (request CPU,memory и limit CPU,memory равны)
+
+
+
+---- стратегии обновления deployment в kubernetes
+strategy:
+	rollingupdate:
+		maxSurge: 1 # 1 под максимум можно поднять, одновременно (можно указать в процентах)
+		maxUnavailble: 1 #1 под будет недоступен (можно указать в процентах)
+	type: RollingUpdate #тип обновления при котором, недоступен 1 сервер и 1 обновляется. По очереди обновится весь Deployment
+	

@@ -7,6 +7,9 @@ docker-compose ps - вывести список контейнеров
 docker-compose exec <<service name>> <<command>> выполнить команду в контейнере
 docker-compose images - список образов
 
+docker export/import экспорт / импорт контейнера из tar архива
+docker cp копирование файла и папки из системы в контейнер и наоборот
+
 docker-compose -f docker-compose.yml -f docker-compose.test.yml up \
     --abort-on-container-exit --exit-code-from test завершить все контейнеры в случае ошибки (используется для тестирования)
 
