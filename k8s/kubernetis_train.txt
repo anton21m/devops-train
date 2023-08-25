@@ -159,3 +159,6 @@ helm repo add bitnami https://charts.bitnami.com/bitnami добавить реп
 helm install website-apache oci://registry-1.docker.io/bitnamicharts/apache инсталлировать chart из репозитария
 helm install custom-apache oci://registry-1.docker.io/bitnamicharts/apache -f apache-mywebpage.yaml инсталлировать пакет и перезаписать переменные из файла
 helm uninstall my-release (helm delete) удалить релиз (все pods,deploy,svc)
+
+
+kubectl apply -f configmap.yml -f deployment-with-configmap.yml Применить несколько конфигов
