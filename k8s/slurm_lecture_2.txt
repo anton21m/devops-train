@@ -1,0 +1,38 @@
+
+kubectl apply -f configmap.yml -f deployment-with-configmap.yml Применить несколько конфигов
+kubectl port-forward my-deployment-65498bfbbc-frzmn 8005:80 & - port forward
+kubectl get all получить все сущности kubernetes
+kubectl cp <id_pod>:<path_file> <name_file> скопировать файл из пода на машину
+
+kubectl apply view-last-applied ingress my-ingress посмотреть последнюю применнюнную файл конфигурации этого ресурса
+kubectl get ingress my-ingress  -o yaml посмотреть полную анотацию этого объекта
+
+kubectl drain <node_name> | kubectl uncordone <node_name> запустить/остановить ноду кластера
+
+
+# работа c configmap
+kubectl edit cm my-configmap редактировать configmap
+kubectl get cm my-configmap -o yaml получить configmap
+
+# работа с secrets
+kubectl create secret generic test --from-literal=test1=asdf создать секрет
+
+# работа с services
+kubectl get endpoints посмотреть endpoints (создается когда создается service)
+kubectl get pod -o wide расширенный список подов
+kube-proxy находящийся в master перенаправляет адреса в pods
+
+К service можно обращаться по имени внутри сети kubernetes
+
+kubectl run -t -i --rm --image amouat/network-utils test bash запустить контейнер для экспериментов и удалить после выхода
+
+# работа с ingress
+kubectl get ingress посмотреть ingress
+
+# работа с pvc (persistent volume claim)
+kubectl get storageclasses.storage.k8s.io (kubectl get sc) получить провизию томов
+kubectl get persistentvolumeclaims (kubectl get pvc) претензии на тома
+kubectl get persistentvolumes (kubectl get pv) тома с данными
+
+Удаление pvc не удаляет тома а переводит их в Released. том больше не может использоваться!!
+

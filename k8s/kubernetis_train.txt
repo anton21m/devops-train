@@ -6,13 +6,16 @@ sudo apt install kubectl установка kubectl
 kubectl get componentstatuses посмотреть статус кластера
 kubectl cluster-info просмотреть информацию о кластере
 kubectl version посмотреть версию 
- kubectl get nodes посмотреть информацию о nodes
+kubectl get nodes посмотреть информацию о nodes
+
+minikube и microk8s работают +- одинаково
 
 # minikube пароль root
 minikube version посмотреть версию 
 minikube start запустить кластер для теста
 minikube start --cpus=2 --memory=1800mb --disk-size=6gb минимальная конфигурация (в virtualbox можно изменить)
 minikube start -p MYSUPERCLUSTER создать кластер с этим именем
+ssh -i $(minikube ssh-key) -p 43813 docker@127.0.0.1 зайти в minikube по ssh
 minikube ssh зайти в minicube как пользователь docker
  minikube stop остановить кластер (данные сохраняются)
 minikube delete удалить кластер для теста
@@ -139,9 +142,20 @@ kubectl expose deploy tomcat --port 8080
 5. настроим ingress controller (предварительно нстроим manifest файл ingress-hosts.yaml)
 kubectl get ingress получить список ingress controller
 kubectl describe ingress получить расширенное описание об ingress
+6. проверим
+	a. если driver=docker чтобы увидеть снаружить нужно сделать туннель (работайте через docker engine вместо docker desktop)
+		Для minicube инструкция здесь
+		https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/
 
-Для minicube инструкция здесь
-https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/
+		minikube ip получить ip
+		minikube ssh
+		curl -H "Host: hello-world.info" <minicube_ip> # работает внутри
+		ssh -i $(minikube ssh-key) -p 43813 docker@127.0.0.1 -L 8008:localhost:80 # open in new terminal
+		curl -H "Host: hello-world.info" 127.0.0.1:8008 # работает снаружи
+	
+Частая проблема TUNNEL_ALREADY_RUNNING исправляется kill командой
+ps -afe | grep -i minikube
+затем kill -9 <pid_процесса>
 
 kubectl get namespaces получить список namespaces
 
@@ -160,5 +174,3 @@ helm install website-apache oci://registry-1.docker.io/bitnamicharts/apache ин
 helm install custom-apache oci://registry-1.docker.io/bitnamicharts/apache -f apache-mywebpage.yaml инсталлировать пакет и перезаписать переменные из файла
 helm uninstall my-release (helm delete) удалить релиз (все pods,deploy,svc)
 
-
-kubectl apply -f configmap.yml -f deployment-with-configmap.yml Применить несколько конфигов

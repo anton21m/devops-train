@@ -1,15 +1,13 @@
-# kubectl apply -f configmap.yml -f deployment-with-configmap.yml
-# kubectl create secret generic test --from-literal=test1=asdf
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-deployment
+  name: fileshare
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: my-app
+      app: fileshare
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -18,23 +16,22 @@ spec:
   template:
     metadata:
       labels:
-        app: my-app
+        app: fileshare
     spec:
+      initContainers:
+        - image: busybox
+          name: mount-permission-fix 
+          command: ["sh", "-c", "chmod 777 /data"]
+          volumeMounts:
+            - name: data
+              mountPath: /data
       containers:
-        - image: nginx:1.12
+        - image: centosadmin/reloadable-nginx:1.12
           name: nginx
-          env:
-            - name: TEST #static variable
-              value: foo
-            - name: TEST_1 #key from secret
-              valueFrom:
-                secretKeyRef:
-                  name: test #name secret
-                  key: test1
           ports:
             - containerPort: 80
           readinessProbe:
-            failureThreshold: 4
+            failureThreshold: 3
             httpGet:
               path: /
               port: 80
@@ -58,10 +55,14 @@ spec:
               cpu: 100m
               memory: 100Mi
           volumeMounts:
-            - name: config #mount 
-              mountPath: /etc/nginx/conf.d/
+            - name: config
+              mountPath: /etc/nginx/conf.d
+            - name: data
+              mountPath: /data
       volumes:
         - name: config
           configMap:
-            name: my-configmap
-            
+            name: fileshare
+        - name: data
+          persistentVolumeClaim: #request volume
+            claimName: fileshare
