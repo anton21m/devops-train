@@ -11,3 +11,5 @@ http://k8s.test.local:8008/files/
 
 Загрузить  файл по WEB DAV
 curl -H "Host: k8s.test.local" 127.0.0.1:8008/files/ -T ingress.yaml
+
+
