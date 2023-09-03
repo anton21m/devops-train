@@ -51,3 +51,4 @@ ansible-playbook -u anton -i inventory/s000/inventory.ini -b --diff cluster.yml
 kubectl --kubeconfig '/home/anton/Documents/devops-train/k8s/kubespray/admin.conf' get nodes
 export KUBECONFIG=$HOME/Documents/devops-train/k8s/kubespray/admin.conf
 
+kubectl undo работает только с deployments

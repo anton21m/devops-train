@@ -150,7 +150,7 @@ kubectl describe ingress получить расширенное описани�
 		minikube ip получить ip
 		minikube ssh
 		curl -H "Host: hello-world.info" <minicube_ip> # работает внутри
-		ssh -i $(minikube ssh-key) -p 43813 docker@127.0.0.1 -L 8008:localhost:80 # open in new terminal
+		ssh -i $(minikube ssh-key) -p "$(docker port minikube 22/tcp | awk -F ':' '{print $2}')" docker@$(docker port minikube 22/tcp | awk -F ':' '{print $1}') # open in new terminal
 		curl -H "Host: hello-world.info" 127.0.0.1:8008 # работает снаружи
 	
 Частая проблема TUNNEL_ALREADY_RUNNING исправляется kill командой
