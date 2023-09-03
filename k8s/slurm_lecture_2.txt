@@ -46,3 +46,18 @@ kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/
 netstat -rn  утилита командной строки, выводящая на дисплей состояние TCP-соединений (как входящих, так и исходящих), таблицы маршрутизации, число сетевых интерфейсов и сетевую статистику по протоколам. 
 
 ipvsadm -ln посмотреть все правила ipvs
+
+https://habr.com/en/company/southbridge/blog/334826 ERP: инициация проекта. Альтернативный взгляд со стороны клиента
+https://itnan.ru/post.php?c=1&p=346314 Понимание сети Kubernetes: сервисы
+http://web.archive.org/web/20220316034750/https://medium.com/@benmeier_/a-quick-minimal-ipvs-load-balancer-demo-d5cc42d0deb4 A minimal IPVS Load Balancer demo
+https://kubernetes.io/blog/2018/07/09/ipvs-based-in-cluster-load-balancing-deep-dive/ IPVS-Based In-Cluster Load Balancing Deep Dive
+https://docs.tigera.io/calico/latest/getting-started/kubernetes Инструкция по kubernetes
+
+kubectll scale sts rabbitmq --replicas=3 скалить statefulset до 3
+
+
+RBAC позволяет разгараничить права если нужен админский доступ или просто кому то дать доступ для мониторинга
+
+kubectl --as=system:serviceaccount:default:user get svc получить сервисы действуя от другого сервисного аккаунта
+
+kubectl config -h получить или изменить config

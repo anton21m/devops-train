@@ -1,0 +1,23 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: view
+subjects:
+  - kind: ServiceAccount
+    name: user
+    namespace: default #namespace default for user
+
+  # for external authorization LDAP
+  
+  # - kind: User
+  #   name: Jane
+  #   apiGroup: rbac.authorization.k8s.io
+  # - kind: Group
+  #   name: developer
+  #   apiGroup: rbac.authorization.k8s.io
+

@@ -1,0 +1,24 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hello
+spec:
+  schedule: "*/1 * * * *" # 1 in minute
+  concurrencyPolicy: Allow # allow more 1 instance (Replace,Forbidden)
+  failedJobsHistoryLimit: 1 # save 1 last error job
+  successfulJobsHistoryLimit: 3 # save 3 last success job
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 100
+      template:
+        spec:
+          containers:
+            - name: hello
+              image: busybox
+              args:
+                - /bin/sh
+                - -c
+                - date; echo Hello from the Kubernetes cluster
+          restartPolicy: Never

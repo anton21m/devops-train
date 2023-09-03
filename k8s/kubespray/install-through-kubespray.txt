@@ -1,0 +1,53 @@
+# установка kubernetes через kubespray на centos 7
+https://serveradmin.ru/kubernetes-ustanovka/ более читаемо
+https://admantium.medium.com/kubernetes-installation-tutorial-kubespray-48e9f72f0f08 
+
+1. Для примера взята virtualbox на которм установлен образ http://isoredirect.centos.org/centos/7/isos/x86_64/
+2. 2 сети:
+    - Nat (бывают проблемы не работает nat https://unix.stackexchange.com/a/79273/583877)
+    - внутрення сеть
+3. Подключаемся по `ssh anton@192.168.56.101` . работает
+4. клонируем репозитарий kubespray и подготавливаем библиотеки
+    sudo -i
+    git clone https://github.com/southbridgeio/kubespray.git
+    cd kubespray
+    pip install -r requirements.txt
+5. Настроить инвентарь inventory/s000/inventory.ini и group_vars
+6. 
+    - добавьте в каждую машину ключи ssh
+        `ssh-copy-id anton@host`
+        для теста:
+          for ip in {105,106,107}; do ssh anton@192.168.56.$ip hostname ; done
+    - Выполните в каждой машине чтобы поправить баг rsync (https://castrillo.gitlab.io/figaro/post/ansible-missing-sudo/)
+        ```
+        sudo -s
+        echo "anton ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/023_anton_nopass
+        ```
+    - Есть вероятнось что etcd требует 2 ядра минимум и отключенный firewalld 
+    - Если при установке невидит другие ноды
+        flannel_interface: enp0s3 # интерфейс NAT
+        flannel_interface_regexp: '192\\.168\\.56\\.\\d{105,107}' #говорит на каких интерфейсах надо запускаться, через какие интерфейсы доступны другие кластера
+7. Запустить `ansible-playbook -u anton -i inventory/s000/inventory.ini -b --diff cluster.yml`
+ - cluster.yaml установка кубера и обновление (с остановкой docker на всех узлах на 5 минут)
+ - scale.yaml расширение кластера
+ - upgrade-cluster мягкое обновление кластера по одному узлу последовательно
+8. Если не может достучаться до localhost:8080 (https://k21academy.com/docker-kubernetes/the-connection-to-the-server-localhost8080-was-refused/)
+    sudo cp /etc/kubernetes/admin.conf $HOME/
+    export KUBECONFIG=$HOME/admin.conf
+9. Затем снесите `ansible-playbook -i inventory/s000/inventory.ini  --become --become-user=root reset.yml` и заново установите (гдето баг в устновщике)
+ansible-playbook -i inventory/s000/inventory.ini  --become --become-user=root reset.yml
+ansible-playbook -u anton -i inventory/s000/inventory.ini -b --diff cluster.yml
+10. Проделайте пункт 8 еще раз
+11. Проверьте что все работает
+    kubectl get nodes
+
+
+Замечено что не работает DNS coredns/coredns и нельзя загрузить image мз за этого
+
+----------------------------------------------------------------------------------------------------------------
+использем этот образ https://github.com/kubernetes-sigs/kubespray
+если будем использовать во вне скопировать файл на компьютер:
+/etc/kubernetes/admin.conf
+kubectl --kubeconfig '/home/anton/Documents/devops-train/k8s/kubespray/admin.conf' get nodes
+export KUBECONFIG=$HOME/Documents/devops-train/k8s/kubespray/admin.conf
+
