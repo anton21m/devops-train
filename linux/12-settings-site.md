@@ -126,7 +126,7 @@ mysql -u root -p
     unzip latest.zip
     mv wordpress/* .
 
-Настроим подключение к базе данных в wp-config.php и скоируем дамп в нее
+Настроим подключение к базе данных в wp-config.php и скопируем дамп в нее
 
     cp wp-config-sample.php wp-config.php
     vim wp-config.php 

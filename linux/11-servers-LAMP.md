@@ -18,7 +18,7 @@ LAMP - это абреавитура которая состоит из:
     apt -y install apache2
     systemctl status apache2
 
-cat /etc/apache2/apache2.conf - основная кофигурация apache2
+cat /etc/apache2/apache2.conf - основная кофигурация apache2 в Debian
 
 ### Centos
 
@@ -26,7 +26,7 @@ cat /etc/apache2/apache2.conf - основная кофигурация apache2
     systemctl status httpd
     systemctl start httpd && systemctl enable httpd
 
-cat /etc/httpd/conf/httpd.conf- основная кофигурация apache2
+cat /etc/httpd/conf/httpd.conf- основная кофигурация apache2 в centOS
 
 На CentOS после установки нужно отредактировать настройки встроенного фаервола:
 
@@ -92,7 +92,7 @@ C его помощью вы сможете отключить небезопа�
 
     systemctl restart apache2
 
-Php поставляется со многими модулями доступными из коробки (по умолчанию) для получения их списка:
+PHP поставляется со многими модулями доступными из коробки (по умолчанию) для получения их списка:
 
     apt-cache search php | egrep "module" | grep "default"
 
@@ -161,7 +161,7 @@ nginx часто применятся в качестве внешнего ке�
     index index.php index.html index.htm;
     
     location / {
-        try_files $uri $uri/ =404;
+        try_files $uri $uri/ /index.php?$args;
     }
     
     location ~ \.php$ {
